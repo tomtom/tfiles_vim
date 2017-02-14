@@ -1,0 +1,41 @@
+*tfiles.txt*  A simple tlib-based file browser
+                Author: Thomas Link, micathom AT gmail com?subject=vim
+
+Leverage tlib's list view as a simple file browser.
+
+Features~
+- Collect all files in the current directory and its subdirectories 
+  (default behaviour)
+- Filter the file list using glob patterns
+- Open one or multiple files
+
+How to use this plugin~
+- Call `:Tfiles` to show all files in the current directory and its 
+  subdirectories.
+- Call `:Tfiles --glob=*` to show only files in the current directory.
+- Call `:Tfiles *.vim` to show only vim source files.
+
+-----------------------------------------------------------------------
+Install~
+
+Either use the zip archive:
+    - Download the zip archive
+    - Extract it to `~/.vim/pack/tml/start/tfiles`
+
+or install from github:
+    - Start a terminal
+    - Change the working directory to `~/.vim/pack/tml/start/`
+    - Type: `git clone https://github.com/tomtom/tfiles_vim`
+
+NOTE: If you don't want to run this plugin on startup, use `~/.vim/pack/tml/opt/`.
+NOTE: On Windows, ~/.vim might be ~/vimfiles. Please see 'runtimepath' for 
+details.
+
+
+Requirements~
+
+This script requires tlib (vimscript #1863) to be installed -- see 
+https://github.com/tomtom/tlib_vim.
+
+
+%s
