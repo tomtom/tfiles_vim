@@ -13,7 +13,7 @@ let s:save_cpo = &cpo
 set cpo&vim
 
 
-" :display: :Tfiles[!] [--rescan] [--glob=GLOB_PATTERN] GLOB_FILTERS
+" :display: :Tfiles[!] [--rescan] [--glob=GLOB_PATTERN] [--dir=DIR] GLOB_FILTERS
 " By default, :Tfiles caches file lists as determined by GLOB_PATTERN, 
 " which defaults to "**". If a bang "!" or the `--rescan` 
 " argument are gives, the disk is rescanned.

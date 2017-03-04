@@ -1,8 +1,8 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     http://www.vim.org/account/profile.php?user_id=4037
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2017-01-19
-" @Revision:    28
+" @Last Change: 2017-03-04
+" @Revision:    74
 
 
 if !exists('g:loaded_tlib') || g:loaded_tlib < 122
@@ -31,6 +31,7 @@ TLet g:tfiles#world = {
             \   {'key':  2,  'agent': 'tfiles#AgentBatchRenameFile',       'key_name': '<c-b>', 'help': 'Batch rename file(s)'},
             \   {'key': 9,   'agent': 'tlib#agent#ShowInfo',               'key_name': '<c-i>', 'help': 'Show info'},
             \   {'key': 28,  'agent': 'tlib#agent#ToggleStickyList',       'key_name': '<c-\>', 'help': 'Toggle sticky'},
+            \   {'key': 07,  'agent': 'tfiles#AgentOpenFile',              'key_name': '<c-g>', 'help': 'Open file with system viewer'},
             \ ],
             \ }
 " \ 'scratch_vertical': (&lines > &co),
@@ -48,32 +49,52 @@ let s:cache = {}
 function! tfiles#Find(args, ...) abort "{{{3
     let opts = tlib#arg#GetOpts(a:args, {})
     TVarArg ['rescan', get(opts, 'rescan', 0)]
-    let dir = getcwd()
+    let cwd = getcwd()
+    let dir = get(opts, 'dir', cwd)
     let glob = get(opts, 'glob', '**')
+    if dir !=# cwd
+        let glob = tlib#file#Join([dir, glob])
+    endif
     let id = printf('%s|%s', dir, glob)
     Tlibtrace 'tfiles', rescan, glob, id
-    if rescan || !has_key(s:cache, id)
-        let files = glob(glob, 0, 1)
-        let files = filter(files, '!isdirectory(v:val)')
-        let s:cache[id] = files
-    else
-        let files = s:cache[id]
-    endif
+    let files = tlib#cache#ValueFromName('tfiles', id, function('tfiles#Glob'), rescan ? -1 : 0, [glob])
+    " if rescan || !has_key(s:cache, id)
+    "     let files = tlib#cache#ValueFromName('tfiles', id, function('tfiles#Glob'), 0, [glob])
+    "     let s:cache[id] = files
+    " else
+    "     let files = s:cache[id]
+    " endif
     let glob_patterns = get(opts, '__rest__', [])
     let rx_patterns = map(copy(glob_patterns), 'glob2regpat(v:val)')
-    if empty(rx_patterns)
-        let files1 = files
-    else
-        let files1 = copy(files)
+    let files1 = copy(files)
+    if !empty(rx_patterns)
         for rx_pattern in rx_patterns
             let files1 = filter(files1, 'v:val =~ rx_pattern')
         endfor
     endif
     let w = tlib#World#New(g:tfiles#world)
-    let w.workind_dir = dir
+    let w.working_dir = dir
     call w.Set_display_format('filename')
     let w.base = files1
-    let fs = tlib#input#ListD(w)
+    let cfiles = map(copy(files1), 'tlib#file#Canonic(v:val)')
+    let cbufname = tlib#file#Canonic(expand('%:p'))
+    let ldir = len(dir)
+    if strpart(cbufname, 0, ldir) ==# dir
+        let cbufname = cbufname[ldir : -1]
+        let cbufname = substitute(cbufname, '^[\/]', '', '')
+    endif
+    let bidx = index(cfiles, cbufname)
+    if bidx != -1
+        let w.initial_index = bidx + 1
+    endif
+    let fs = tlib#input#ListW(w)
+endf
+
+
+function! tfiles#Glob(glob) abort "{{{3
+    let files = glob(a:glob, 0, 1)
+    let files = tlib#file#FilterFiles(files, {'all': 0, 'type': 'f'})
+    return files
 endf
 
 
@@ -225,7 +246,7 @@ endf
 
 
 function! s:ResetInputList(world) abort "{{{3
-    unlet! s:cache[a:world.workind_dir]
+    unlet! s:cache[a:world.working_dir]
     return a:world
 endf
 
@@ -249,5 +270,14 @@ function! tfiles#AgentCopyFile(world, selected)
         call s:CopyFile(file, name, 0)
     endfor
     return s:ResetInputList(a:world)
+endf
+
+
+function! tfiles#AgentOpenFile(world, selected) abort "{{{3
+    for file in a:selected
+        call tlib#sys#OpenWithSystemViewer(file)
+    endfor
+    let a:world.state = 'exit'
+    return a:world
 endf
 
