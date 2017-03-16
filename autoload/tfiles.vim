@@ -1,8 +1,8 @@
 " @Author:      Tom Link (mailto:micathom AT gmail com?subject=[vim])
 " @Website:     http://www.vim.org/account/profile.php?user_id=4037
 " @License:     GPL (see http://www.gnu.org/licenses/gpl.txt)
-" @Last Change: 2017-03-07
-" @Revision:    76
+" @Last Change: 2017-03-16
+" @Revision:    78
 
 
 if !exists('g:loaded_tlib') || g:loaded_tlib < 122
@@ -87,7 +87,7 @@ function! tfiles#Find(args, ...) abort "{{{3
             let cbufname = cbufname[ldir : -1]
             let cbufname = substitute(cbufname, '^[\/]', '', '')
         endif
-        let bidx = index(cfiles, cbufname)
+        let bidx = index(cfiles, cbufname, 0, !has('fname_case'))
         if bidx != -1
             let w.initial_index = bidx + 1
         endif
