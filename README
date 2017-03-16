@@ -1,10 +1,15 @@
-Leverage tlib's list view as a simple file browser.
+Leverage tlib's list view as a simple file browser so that users can quickly 
+access a file in some folder hierarchie below the current workind directory. 
+This isn't a full fledged explorer-type of plugin like netrw or Nerdtree.
 
 Features~
 - Collect all files in the current directory and its subdirectories 
   (default behaviour)
 - Filter the file list using glob patterns
+- By default file lists are cached, the disk is rescanned only when |:Tfiles| 
+  is invoked with a bang ("!").
 - Open one or multiple files
+- Open a file with the system viewer
 
 How to use this plugin~
 - Call `:Tfiles` to show all files in the current directory and its 
